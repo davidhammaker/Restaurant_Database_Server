@@ -18,7 +18,13 @@ class WebserverHandler(BaseHTTPRequestHandler):
                 self.send_header('Content-type', 'text/html; charset=utf-8')
                 self.end_headers()
 
-                output = ""
+                all_restaurants = session.query(Restaurant).all()
+
+                output = "<html><body><h3>All Restaurants:</h3>"
+
+                for restaurant in all_restaurants:
+                    output += "<p>" + restaurant.name + "</p>"
+                output += "</body></html>"
 
                 self.wfile.write(output.encode())
                 print(output)
