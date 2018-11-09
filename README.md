@@ -26,3 +26,6 @@ After you have cloned the repository, you can log back into the virtual machine 
 * If you experience any errors, check that you have SQLAlchemy installed. Running `$ pip3 install SQLAlchemy` will either install the module or inform you that the module is already installed. (If `$ pip3` fails, you may need to install that, too. Try `$ sudo apt-get install pip3`, and then proceed to `$ pip3 install SQLAlchemy`.)
 
 Once the server is up and running (your shell should say `Web server running on port 8080`), you can access the webpage by typing `localhost:8080/restaurants` into your web browser.
+
+## Work-in-progress
+I am still continuing my work on this course, so this repository is not yet complete. Check back for updates.
