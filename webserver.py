@@ -39,12 +39,32 @@ class WebserverHandler(BaseHTTPRequestHandler):
                 output = "<html><body><h3>All Restaurants:</h3>"
 
                 for restaurant in all_restaurants:
-                    output += "<p>" + restaurant.name + "</p>"
+                    restaurant_url = restaurant.name.replace("'", "").replace(" ", "")
+                    output += "<p>" + restaurant.name
+                    output += "<br><a href=\"/edit/" + restaurant_url + "\">Edit</a>"
+                    output += "<br><a href=\"/delete/" + restaurant_url + "\">Delete</a>"
+                    output += "</p>"
                 output += "</body></html>"
 
                 self.wfile.write(output.encode())
                 print(output)
                 return
+
+            elif "edit" in self.path:
+                self.send_response(200)
+                self.send_header('Content-type', 'text/html; charset=utf-8')
+                self.end_headers()
+
+                self.wfile.write("<html><body>Edit</body></html>".encode())
+                print("Edit")
+
+            elif "delete" in self.path:
+                self.send_response(200)
+                self.send_header('Content-type', 'text/html; charset=utf-8')
+                self.end_headers()
+
+                self.wfile.write("<html><body>Delete</body></html>".encode())
+                print("Delete")
 
         except IOError:
             self.send_error(404, "File Not Found: {}".format(self.path))
