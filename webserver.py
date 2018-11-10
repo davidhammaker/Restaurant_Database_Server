@@ -134,7 +134,18 @@ class WebserverHandler(BaseHTTPRequestHandler):
 
                 output = ""
                 if delete_answer == "Yes":
-                    output = "<html><body>If this was real, that restaurant would be DELETED.</body></html>"
+                    all_restaurants = session.query(Restaurant).all()
+                    delete_restaurant_id = int(str.split(self.path, "/")[-2])
+                    delete_restaurant = session.query(Restaurant).filter_by(id=delete_restaurant_id).one()
+
+                    print("id: {}".format(delete_restaurant_id))
+                    print("restaurant: {}".format(delete_restaurant.name))
+
+                    # session.delete(delete_restaurant)
+                    # session.commit()
+
+                    output = "<htmll><body>\"{}\" has been deleted.".format(delete_restaurant.name)
+
                 elif delete_answer == "No":
                     output = "<html><body>The restaurant has NOT been deleted."
 
