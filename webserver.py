@@ -39,10 +39,10 @@ class WebserverHandler(BaseHTTPRequestHandler):
                 output = "<html><body><h3>All Restaurants:</h3>"
 
                 for restaurant in all_restaurants:
-                    restaurant_url = restaurant.name.replace("'", "").replace(" ", "")
+                    restaurant_url = str(restaurant.id) + "/" + restaurant.name.replace("'", "").replace(" ", "")
                     output += "<p>" + restaurant.name
-                    output += "<br><a href=\"/edit/" + restaurant_url + "\">Edit</a>"
-                    output += "<br><a href=\"/delete/" + restaurant_url + "\">Delete</a>"
+                    output += "<br><a href=\"/restaurants/edit/" + restaurant_url + "\">Edit</a>"
+                    output += "<br><a href=\"/restaurants/delete/" + restaurant_url + "\">Delete</a>"
                     output += "</p>"
                 output += "</body></html>"
 
@@ -58,15 +58,15 @@ class WebserverHandler(BaseHTTPRequestHandler):
                 output = "<html><body>Enter new restaurant name:<br>"
 
                 all_restaurants = session.query(Restaurant).all()
-                edit_restaurant = ""
+                edit_restaurant = int(str.split(self.path, "/")[-2])
+                old_restaurant = ""
                 for restaurant in all_restaurants:
-                    restaurant_url = restaurant.name.replace("'", "").replace(" ", "")
-                    if restaurant_url in self.path:
-                        edit_restaurant = restaurant.name
+                    if restaurant.id == edit_restaurant:
+                        old_restaurant = restaurant.name
 
                 output += "<form method=\"POST\">" \
                           "<input name=\"edit_name\" type=\"text\" action=\"d" + self.path + "\" " \
-                          "value=\"" + edit_restaurant + "\"><input type=\"submit\" value=\"Submit\"></form>"
+                          "value=\"" + old_restaurant + "\"><input type=\"submit\" value=\"Submit\"></form>"
                 output += "</body></html>"
 
                 self.wfile.write(output.encode())
@@ -97,12 +97,8 @@ class WebserverHandler(BaseHTTPRequestHandler):
             self.end_headers()
 
             all_restaurants = session.query(Restaurant).all()
-            edit_restaurant = ""
-            for restaurant in all_restaurants:
-                restaurant_url = restaurant.name.replace("'", "").replace(" ", "")
-                if restaurant_url in self.path:
-                    edit_restaurant = restaurant.name
-            restaurant_rename = session.query(Restaurant).filter_by(name=edit_restaurant).one()
+            edit_restaurant = int(str.split(self.path, "/")[-2])
+            restaurant_rename = session.query(Restaurant).filter_by(id=edit_restaurant).one()
             restaurant_rename.name = edit_name
             session.add(restaurant_rename)
             session.commit()
