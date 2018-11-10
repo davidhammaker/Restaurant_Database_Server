@@ -156,8 +156,8 @@ class WebserverHandler(BaseHTTPRequestHandler):
                     print("id: {}".format(delete_restaurant_id))
                     print("restaurant: {}".format(delete_restaurant.name))
 
-                    # session.delete(delete_restaurant)
-                    # session.commit()
+                    session.delete(delete_restaurant)
+                    session.commit()
 
                     output = "<html><body>\"{}\" has been deleted.".format(delete_restaurant.name)
 
