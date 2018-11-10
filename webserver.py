@@ -44,6 +44,9 @@ class WebserverHandler(BaseHTTPRequestHandler):
                     output += "<br><a href=\"/restaurants/edit/" + restaurant_url + "\">Edit</a>"
                     output += "<br><a href=\"/restaurants/delete/" + restaurant_url + "\">Delete</a>"
                     output += "</p>"
+
+                output += "<h3><a href=\"/restaurants/create\">Create New Restaurant</a></h3>"
+
                 output += "</body></html>"
 
                 self.wfile.write(output.encode())
@@ -87,6 +90,18 @@ class WebserverHandler(BaseHTTPRequestHandler):
                 self.wfile.write(output.encode())
                 print("Delete")
 
+            elif "create" in self.path:
+                self.send_response(200)
+                self.send_header('Content-type', 'text/html; charset=utf-8')
+                self.end_headers()
+
+                output = "<html><body>Enter the name of your new restaurant:<br>" \
+                         "<form method=\"POST\">" \
+                         "<input name=\"create\" type=\"text\"><input type=\"submit\" value=\"Submit\">" \
+                         "</form></body></html>"
+
+                self.wfile.write(output.encode())
+
         except IOError:
             self.send_error(404, "File Not Found: {}".format(self.path))
 
@@ -99,12 +114,12 @@ class WebserverHandler(BaseHTTPRequestHandler):
             data = self.rfile.read(length).decode()
             print(parse_qs(data))
 
-            edit_or_delete = ""
+            post_goal = ""
             for key in parse_qs(data):
-                edit_or_delete = key
-                print(edit_or_delete)
+                post_goal = key
+                print(post_goal)
 
-            if edit_or_delete == "edit_name":
+            if post_goal == "edit_name":
                 edit_name = parse_qs(data)["edit_name"][0]
 
                 self.send_response(200)
@@ -124,7 +139,7 @@ class WebserverHandler(BaseHTTPRequestHandler):
                 self.wfile.write(output.encode())
                 print(output)
 
-            elif edit_or_delete == "delete":
+            elif post_goal == "delete":
                 delete_answer = parse_qs(data)["delete"][0]
                 print(delete_answer)
 
@@ -144,11 +159,28 @@ class WebserverHandler(BaseHTTPRequestHandler):
                     # session.delete(delete_restaurant)
                     # session.commit()
 
-                    output = "<htmll><body>\"{}\" has been deleted.".format(delete_restaurant.name)
+                    output = "<html><body>\"{}\" has been deleted.".format(delete_restaurant.name)
 
                 elif delete_answer == "No":
                     output = "<html><body>The restaurant has NOT been deleted."
 
+                output += "<br><a href=\"/restaurants\">Return to restaurants</a></body></html>"
+
+                self.wfile.write(output.encode())
+
+            elif post_goal == "create":
+                new_restaurant_name = parse_qs(data)["create"][0]
+                print(new_restaurant_name)
+
+                self.send_response(200)
+                self.send_header('content-type', 'text/html; charset=utf-8')
+                self.end_headers()
+
+                new_restaurant = Restaurant(name = new_restaurant_name)
+                session.add(new_restaurant)
+                session.commit()
+
+                output = "<html><body>" + new_restaurant_name + " has been created."
                 output += "<br><a href=\"/restaurants\">Return to restaurants</a></body></html>"
 
                 self.wfile.write(output.encode())
