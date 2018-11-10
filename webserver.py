@@ -77,7 +77,14 @@ class WebserverHandler(BaseHTTPRequestHandler):
                 self.send_header('Content-type', 'text/html; charset=utf-8')
                 self.end_headers()
 
-                self.wfile.write("<html><body>Delete</body></html>".encode())
+                output = "<html><body>Are you sure?"
+                output += "<br><form method=\"POST\">" \
+                          "<input name=\"delete\" type=\"radio\" value=\"No\" checked>No<br>" \
+                          "<input name=\"delete\" type=\"radio\" value=\"Yes\">Yes<br>" \
+                          "<input type=\"submit\" value=\"Submit\">" \
+                          "</form></body></html>"
+
+                self.wfile.write(output.encode())
                 print("Delete")
 
         except IOError:
@@ -90,24 +97,50 @@ class WebserverHandler(BaseHTTPRequestHandler):
         try:
             length = int(self.headers.get('content-length', 0))
             data = self.rfile.read(length).decode()
-            edit_name = parse_qs(data)["edit_name"][0]
+            print(parse_qs(data))
 
-            self.send_response(200)
-            self.send_header('content-type', 'text/html; charset=utf-8')
-            self.end_headers()
+            edit_or_delete = ""
+            for key in parse_qs(data):
+                edit_or_delete = key
+                print(edit_or_delete)
 
-            all_restaurants = session.query(Restaurant).all()
-            edit_restaurant = int(str.split(self.path, "/")[-2])
-            restaurant_rename = session.query(Restaurant).filter_by(id=edit_restaurant).one()
-            restaurant_rename.name = edit_name
-            session.add(restaurant_rename)
-            session.commit()
+            if edit_or_delete == "edit_name":
+                edit_name = parse_qs(data)["edit_name"][0]
 
-            output = "<html><body>Restaurant Edited: " + edit_name
-            output += "<br><a href=\"/restaurants\">Return to Restaurants</a></body></html>"
+                self.send_response(200)
+                self.send_header('content-type', 'text/html; charset=utf-8')
+                self.end_headers()
 
-            self.wfile.write(output.encode())
-            print(output)
+                all_restaurants = session.query(Restaurant).all()
+                edit_restaurant = int(str.split(self.path, "/")[-2])
+                restaurant_rename = session.query(Restaurant).filter_by(id=edit_restaurant).one()
+                restaurant_rename.name = edit_name
+                session.add(restaurant_rename)
+                session.commit()
+
+                output = "<html><body>Restaurant Edited: " + edit_name
+                output += "<br><a href=\"/restaurants\">Return to Restaurants</a></body></html>"
+
+                self.wfile.write(output.encode())
+                print(output)
+
+            elif edit_or_delete == "delete":
+                delete_answer = parse_qs(data)["delete"][0]
+                print(delete_answer)
+
+                self.send_response(200)
+                self.send_header('content-type', 'text/html; charset=utf-8')
+                self.end_headers()
+
+                output = ""
+                if delete_answer == "Yes":
+                    output = "<html><body>If this was real, that restaurant would be DELETED.</body></html>"
+                elif delete_answer == "No":
+                    output = "<html><body>The restaurant has NOT been deleted."
+
+                output += "<br><a href=\"/restaurants\">Return to restaurants</a></body></html>"
+
+                self.wfile.write(output.encode())
 
         except:
             pass
