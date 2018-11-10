@@ -55,8 +55,22 @@ class WebserverHandler(BaseHTTPRequestHandler):
                 self.send_header('Content-type', 'text/html; charset=utf-8')
                 self.end_headers()
 
-                self.wfile.write("<html><body>Edit</body></html>".encode())
-                print("Edit")
+                output = "<html><body>Enter new restaurant name:<br>"
+
+                all_restaurants = session.query(Restaurant).all()
+                edit_restaurant = ""
+                for restaurant in all_restaurants:
+                    restaurant_url = restaurant.name.replace("'", "").replace(" ", "")
+                    if restaurant_url in self.path:
+                        edit_restaurant = restaurant.name
+
+                output += "<form method=\"POST\">" \
+                          "<input name=\"edit_name\" type=\"text\" action=\"d" + self.path + "\" " \
+                          "value=\"" + edit_restaurant + "\"><input type=\"submit\" value=\"Submit\"></form>"
+                output += "</body></html>"
+
+                self.wfile.write(output.encode())
+
 
             elif "delete" in self.path:
                 self.send_response(200)
@@ -76,13 +90,25 @@ class WebserverHandler(BaseHTTPRequestHandler):
         try:
             length = int(self.headers.get('content-length', 0))
             data = self.rfile.read(length).decode()
-            message = parse_qs(data)["message"][0]
+            edit_name = parse_qs(data)["edit_name"][0]
 
-            self.send_response(301)
+            self.send_response(200)
             self.send_header('content-type', 'text/html; charset=utf-8')
             self.end_headers()
 
-            output = ""
+            all_restaurants = session.query(Restaurant).all()
+            edit_restaurant = ""
+            for restaurant in all_restaurants:
+                restaurant_url = restaurant.name.replace("'", "").replace(" ", "")
+                if restaurant_url in self.path:
+                    edit_restaurant = restaurant.name
+            restaurant_rename = session.query(Restaurant).filter_by(name=edit_restaurant).one()
+            restaurant_rename.name = edit_name
+            session.add(restaurant_rename)
+            session.commit()
+
+            output = "<html><body>Restaurant Edited: " + edit_name
+            output += "<br><a href=\"/restaurants\">Return to Restaurants</a></body></html>"
 
             self.wfile.write(output.encode())
             print(output)
