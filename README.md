@@ -27,5 +27,13 @@ After you have cloned the repository, you can log back into the virtual machine 
 
 Once the server is up and running (your shell should say `Web server running on port 8080`), you can access the webpage by typing `localhost:8080/restaurants` into your web browser.
 
-## Work-in-progress
-I am still continuing my work on this course, so this repository is not yet complete. Check back for updates.
+## Changes for Python 3 version
+This repo includes one file that works in Python 3, `webserver.py`, of which I am the primary author. (I.e. I typed it all out, translating the instructor's examples as I went, and adding in my own code frequently.) The `webserver.py` file differs greatly from the instructor's examples, but may serve as a reference for those who are interested in getting a different perspective.
+
+I attempted without success to port the instructor's Python 2 example to Python 3. The instructor's original file may be found [here](https://github.com/udacity/Full-Stack-Foundations/blob/master/Lesson-2/Objective-5-Solution/webserver.py).
+
+Here is a list of problems I discovered with the instructor's example, which contributed to its inability to run with Python 3:
+* All `print` statements should be `print()` functions.
+* `BaseHTTPServer` is not a Python 3 module. In Python 3, an equivalent would be `from http.server import BaseHTTPRequestHandler, HTTPServer`.
+* Each `output` must be encoded for HTTP. (I.e. `self.wfile.write(output.encode())`.) Without this encoding, Python raises an exception.
+* Parsing with `cgi` does not seem to work properly. I was unable to correct this problem, even after correcting the others listed above. Python raises no exceptions, but the page fails to load.
